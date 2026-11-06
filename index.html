@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#08090d">
+
+<title>LENSORA - Camera Studio</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #08090d;
+    color: white;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #242630;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.logo span {
+    color: #c5a76b;
+}
+
+.status {
+    font-size: 11px;
+    color: #aaa;
+}
+
+main {
+    max-width: 650px;
+    margin: auto;
+    padding: 18px;
+}
+
+.heading {
+    margin: 12px 0 20px;
+}
+
+.heading h2 {
+    font-size: 22px;
+}
+
+.heading p {
+    color: #999;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+.camera {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #151720;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #353743;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-top {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 2;
+}
+
+.badge {
+    background: #08090dc9;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #d5bd8d;
+}
+
+#cameraMessage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 25px;
+    color: #aaa;
+    font-size: 14px;
+    background: #11131b;
+}
+
+.camera-bottom {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.control {
+    background: #20222d;
+    padding: 13px;
+    border-radius: 50%;
+    font-size: 18px;
+    width: 48px;
+    height: 48px;
+}
+
+.shutter {
+    width: 72px;
+    height: 72px;
+    background: white;
+    border: 5px solid #777;
+    border-radius: 50%;
+}
+
+.recording {
+    background: #e32c42;
+}
+
+.modes {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 22px 0;
+}
+
+.mode {
+    background: none;
+    color: #888;
+    font-size: 13px;
+    padding: 8px;
+}
+
+.mode.active {
+    color: #d6b77d;
+    border-bottom: 2px solid #d6b77d;
+}
+
+.panel {
+    background: #141620;
+    padding: 17px;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.panel h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid #292b36;
+    font-size: 12px;
+}
+
+.info span:last-child {
+    color: #d6b77d;
+}
+
+.action {
+    background: #c5a76b;
+    color: #101010;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 12px;
+}
+
+#gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+#gallery img {
+    width: 100%;
+    border-radius: 9px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+    font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">LEN<span>SORA</span></div>
+    <div class="status" id="status">CAMERA OFFLINE</div>
+</header>
+
+<main>
+
+<div class="heading">
+    <h2>Camera Studio</h2>
+    <p>Professional photography starts here.</p>
+</div>
+
+<div class="camera">
+
+    <video id="video" autoplay playsinline muted></video>
+
+    <div id="cameraMessage">
+        Your professional camera is waiting.<br><br>
+        Tap START CAMERA below.
+    </div>
+
+    <div class="camera-top">
+        <div class="badge" id="quality">CAMERA READY</div>
+        <div class="badge">LENSORA PRO</div>
+    </div>
+
+</div>
+
+<div class="modes">
+    <button class="mode active" id="photoMode">PHOTO</button>
+    <button class="mode" id="videoMode">VIDEO</button>
+</div>
+
+<div class="camera-bottom">
+
+    <button class="control" id="switchBtn">🔄</button>
+
+    <button class="shutter" id="captureBtn"></button>
+
+    <button class="control" id="flashBtn">⚡</button>
+
+</div>
+
+<button class="action" id="startBtn">
+    START CAMERA
+</button>
+
+<div class="panel">
+    <h3>CAMERA INFORMATION</h3>
+
+    <div class="info">
+        <span>Camera status</span>
+        <span id="cameraStatus">Offline</span>
+    </div>
+
+    <div class="info">
+        <span>Resolution</span>
+        <span id="resolution">Not detected</span>
+    </div>
+
+    <div class="info">
+        <span>Frame rate</span>
+        <span id="fps">Not detected</span>
+    </div>
+
+    <div class="info">
+        <span>4K support</span>
+        <span id="fourK">Checking...</span>
+    </div>
+</div>
+
+<div class="panel">
+    <h3>MY PHOTOS</h3>
+    <div id="gallery">
+        <p style="color:#777;font-size:12px">
+            Your captured pictures will appear here.
+        </p>
+    </div>
+</div>
+
+</main>
+
+<footer>
+    LENSORA © 2026<br>
+    EVERY SHOT. A MASTERPIECE.
+</footer>
+
+<script>
+
+const video = document.getElementById("video");
+const message = document.getElementById("cameraMessage");
+
+const startBtn = document.getElementById("startBtn");
+const captureBtn = document.getElementById("captureBtn");
+
+const status = document.getElementById("status");
+const cameraStatus = document.getElementById("cameraStatus");
+
+let stream = null;
+let facing = "environment";
+let mode = "photo";
+let recorder = null;
+let chunks = [];
+let recording = false;
+let torchOn = false;
+
+async function startCamera() {
+
+    try {
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            throw new Error(
+                "Camera access requires HTTPS or localhost. Open this site through a secure connection."
+            );
+
+        }
+
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        status.textContent = "CONNECTING...";
+
+        stream = await navigator.mediaDevices.getUserMedia({
+
+            audio: mode === "video",
+
+            video: {
+                facingMode: { ideal: facing },
+
+                width: { ideal: 3840 },
+                height: { ideal: 2160 },
+
+                frameRate: { ideal: 30, max: 60 }
+            }
+
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        message.style.display = "none";
+
+        startBtn.textContent = "CAMERA ACTIVE";
+
+        status.textContent = "CAMERA ONLINE";
+
+        cameraStatus.textContent = "Active";
+
+        updateCameraInfo();
+
+    } catch (error) {
+
+        status.textContent = "CAMERA ERROR";
+
+        message.style.display = "flex";
+
+        message.textContent = error.message;
+
+        cameraStatus.textContent = "Unavailable";
+
+        console.error(error);
+
+    }
+
+}
+
+function updateCameraInfo() {
+
+    if (!stream) return;
+
+    const track = stream.getVideoTracks()[0];
+
+    const settings = track.getSettings();
+
+    const width = settings.width || 0;
+    const height = settings.height || 0;
+
+    document.getElementById("resolution").textContent =
+        width + " × " + height;
+
+    document.getElementById("fps").textContent =
+        (settings.frameRate || "Unknown") + " FPS";
+
+    const supported =
+        width >= 3840 && height >= 2160;
+
+    document.getElementById("fourK").textContent =
+        supported ? "4K ACTIVE" : "Not active";
+
+    document.getElementById("quality").textContent =
+        supported ? "4K UHD" : "LIVE CAMERA";
+
+}
+
+startBtn.onclick = startCamera;
+
+document.getElementById("switchBtn").onclick = async () => {
+
+    facing =
+        facing === "environment" ? "user" : "environment";
+
+    await startCamera();
+
+};
+
+document.getElementById("photoMode").onclick = () => {
+
+    mode = "photo";
+
+    document.getElementById("photoMode").classList.add("active");
+    document.getElementById("videoMode").classList.remove("active");
+
+    captureBtn.classList.remove("recording");
+
+    if (recording) stopRecording();
+
+};
+
+document.getElementById("videoMode").onclick = () => {
+
+    mode = "video";
+
+    document.getElementById("videoMode").classList.add("active");
+    document.getElementById("photoMode").classList.remove("active");
+
+};
+
+captureBtn.onclick = () => {
+
+    if (!stream) {
+        alert("Start the camera first.");
+        return;
+    }
+
+    if (mode === "photo") {
+        takePhoto();
+    } else {
+        toggleRecording();
+    }
+
+};
+
+function takePhoto() {
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob(blob => {
+
+        if (!blob) return;
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "LENSORA_" + Date.now() + ".jpg";
+
+        link.click();
+
+        const img = document.createElement("img");
+
+        img.src = url;
+
+        const gallery = document.getElementById("gallery");
+
+        if (gallery.querySelector("p")) {
+            gallery.innerHTML = "";
+        }
+
+        gallery.prepend(img);
+
+    }, "image/jpeg", 0.98);
+
+}
+
+function toggleRecording() {
+
+    if (recording) {
+        stopRecording();
+        return;
+    }
+
+    const track = stream.getVideoTracks()[0];
+
+    const settings = track.getSettings();
+
+    const mimeTypes = [
+        "video/mp4",
+        "video/webm;codecs=vp9",
+        "video/webm;codecs=vp8",
+        "video/webm"
+    ];
+
+    const mimeType = mimeTypes.find(type =>
+        MediaRecorder.isTypeSupported(type)
+    );
+
+    if (!mimeType) {
+        alert("Video recording is not supported in this browser.");
+        return;
+    }
+
+    chunks = [];
+
+    recorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: 25000000
+    });
+
+    recorder.ondataavailable = event => {
+
+        if (event.data.size > 0) {
+            chunks.push(event.data);
+        }
+
+    };
+
+    recorder.onstop = () => {
+
+        const blob = new Blob(chunks, {
+            type: mimeType
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "LENSORA_VIDEO_" +
+            Date.now() +
+            (mimeType.includes("mp4") ? ".mp4" : ".webm");
+
+        link.click();
+
+    };
+
+    recorder.start();
+
+    recording = true;
+
+    captureBtn.classList.add("recording");
+
+}
+
+function stopRecording() {
+
+    if (recorder && recording) {
+
+        recorder.stop();
+
+        recording = false;
+
+        captureBtn.classList.remove("recording");
+
+    }
+
+}
+
+document.getElementById("flashBtn").onclick =
+async () => {
+
+    if (!stream) {
+        alert("Start the camera first.");
+        return;
+    }
+
+    const track = stream.getVideoTracks()[0];
+
+    const capabilities =
+        track.getCapabilities?.();
+
+    if (!capabilities || !capabilities.torch) {
+
+        alert("Torch control is not supported by this camera/browser.");
+
+        return;
+
+    }
+
+    try {
+
+        torchOn = !torchOn;
+
+        await track.applyConstraints({
+
+            advanced: [
+                { torch: torchOn }
+            ]
+
+        });
+
+        document.getElementById("flashBtn").textContent =
+            torchOn ? "💡" : "⚡";
+
+    } catch (error) {
+
+        alert("Unable to control the torch.");
+
+    }
+
+};
+
+</script>
+
+</body>
+</html>
